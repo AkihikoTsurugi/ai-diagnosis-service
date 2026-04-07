@@ -10,8 +10,7 @@ export default function CtaSection() {
       component="section"
       sx={{
         py: { xs: 8, md: 10 },
-        bgcolor: "#FFFFFF",
-        borderTop: "1px solid #e8eaed",
+        background: "linear-gradient(135deg, #1565C0 0%, #1A237E 100%)",
         textAlign: "center",
       }}
     >
@@ -20,12 +19,10 @@ export default function CtaSection() {
           variant="h4"
           component="h2"
           sx={{
-            color: "#202124",
+            color: "#fff",
             fontSize: { xs: "1.5rem", md: "2rem" },
             mb: { xs: 3, md: 4 },
-            lineHeight: 1.35,
-            fontWeight: 700,
-            letterSpacing: "-0.02em",
+            lineHeight: 1.4,
           }}
         >
           {BOTTOM_CTA.heading}
@@ -37,10 +34,10 @@ export default function CtaSection() {
           variant="caption"
           sx={{
             display: "block",
-            color: "#5f6368",
+            color: "rgba(255,255,255,0.6)",
             mt: 2.5,
             fontSize: "0.875rem",
-            letterSpacing: "0.02em",
+            letterSpacing: "0.05em",
           }}
         >
           {BOTTOM_CTA.note}
