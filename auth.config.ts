@@ -15,6 +15,7 @@ export default {
   },
   pages: {
     signIn: "/auth/signin",
+    error: "/auth/error",
   },
   callbacks: {
     authorized({ auth, request }) {
