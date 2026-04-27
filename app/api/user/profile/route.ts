@@ -3,6 +3,8 @@ import clientPromise, { getDbName } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 async function getUsersCollection() {
   const client = await clientPromise;
   const dbName = getDbName();

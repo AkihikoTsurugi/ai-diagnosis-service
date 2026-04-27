@@ -7,6 +7,13 @@ export default {
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      /**
+       * 既定の PKCE は code_verifier を暗号化クッキーに載せる。
+       * 本番で AUTH_URL / ドメイン不一致やシークレット周りの不整合があると
+       * InvalidCheck: pkceCodeVerifier value could not be parsed になりやすい。
+       * Google（機密クライアント）は state のみでも認可コードフローが成立する。
+       */
+      checks: ["state"],
     }),
   ],
   session: {

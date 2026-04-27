@@ -14,10 +14,9 @@ function createClientPromise(connectionString: string): Promise<MongoClient> {
   return client.connect();
 }
 
+/** Vercel 等のサーバーレスでも同一実行環境内で接続を再利用する（公式推奨パターン） */
 const clientPromise: Promise<MongoClient> =
-  process.env.NODE_ENV === "development"
-    ? (global._mongoClientPromise ??= createClientPromise(mongodbUri))
-    : createClientPromise(mongodbUri);
+  global._mongoClientPromise ??= createClientPromise(mongodbUri);
 
 export default clientPromise;
 
