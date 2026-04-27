@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Noto_Sans_JP, Inter } from "next/font/google";
 import ThemeRegistry from "./theme/ThemeRegistry";
 import AuthSessionProvider from "./providers";
+import SiteHeader from "./components/SiteHeader";
 import "./globals.css";
 
 const notoSansJP = Noto_Sans_JP({
@@ -38,7 +39,10 @@ export default function RootLayout({
       {/* suppressHydrationWarning: ブラウザ拡張が <body> に属性を注入した場合の不一致を許容 */}
       <body suppressHydrationWarning>
         <ThemeRegistry>
-          <AuthSessionProvider>{children}</AuthSessionProvider>
+          <AuthSessionProvider>
+            <SiteHeader />
+            {children}
+          </AuthSessionProvider>
         </ThemeRegistry>
       </body>
     </html>
