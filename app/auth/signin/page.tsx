@@ -1,5 +1,6 @@
 "use client";
 
+import GitHubIcon from "@mui/icons-material/GitHub";
 import { signIn } from "next-auth/react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -26,17 +27,36 @@ export default function SignInPage() {
               ログイン
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Google アカウントで会員エリア（ダッシュボード・プロフィール）にアクセスできます。
+              Google または GitHub
+              アカウントで会員エリア（ダッシュボード・プロフィール）にアクセスできます。
             </Typography>
-            <Button
-              variant="contained"
-              size="large"
-              onClick={() =>
-                signIn("google", { callbackUrl: "/dashboard" })
-              }
-            >
-              Google でログイン
-            </Button>
+            <Stack spacing={1.5}>
+              <Button
+                variant="contained"
+                size="large"
+                fullWidth
+                onClick={() =>
+                  signIn("google", { callbackUrl: "/dashboard" })
+                }
+              >
+                Google でログイン
+              </Button>
+              <Button
+                variant="contained"
+                size="large"
+                fullWidth
+                startIcon={<GitHubIcon />}
+                onClick={() =>
+                  signIn("github", { callbackUrl: "/dashboard" })
+                }
+                sx={{
+                  bgcolor: "#24292f",
+                  "&:hover": { bgcolor: "#1b1f23" },
+                }}
+              >
+                GitHub でログイン
+              </Button>
+            </Stack>
           </Stack>
         </CardContent>
       </Card>
