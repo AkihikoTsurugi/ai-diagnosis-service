@@ -13,6 +13,8 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Link from "next/link";
 
+const MAX_AVATAR_BYTES = 300 * 1024;
+
 type Profile = {
   id: string;
   name: string | null;
@@ -29,6 +31,7 @@ export default function ProfileContent() {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [avatarUploading, setAvatarUploading] = useState(false);
   const [message, setMessage] = useState<{
     type: "success" | "error";
     text: string;
@@ -88,6 +91,48 @@ export default function ProfileContent() {
     }
   }
 
+  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    if (file.size > MAX_AVATAR_BYTES) {
+      setMessage({
+        type: "error",
+        text: "ファイルサイズは 300KB 以下にしてください",
+      });
+      return;
+    }
+
+    setMessage(null);
+    setAvatarUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/user/profile/avatar", {
+        method: "POST",
+        body: fd,
+      });
+      const data = (await res.json()) as { error?: string } & Profile;
+      if (!res.ok) throw new Error(data.error ?? "アップロードに失敗しました");
+      setProfile(data);
+      await update({
+        user: {
+          image: data.image ?? undefined,
+          name: data.name ?? undefined,
+        },
+      });
+      setMessage({ type: "success", text: "プロフィール画像を更新しました" });
+    } catch (err) {
+      setMessage({
+        type: "error",
+        text: err instanceof Error ? err.message : "アップロードに失敗しました",
+      });
+    } finally {
+      setAvatarUploading(false);
+    }
+  }
+
   if (status === "loading" || loading) {
     return (
       <Box sx={{ p: 3 }}>
@@ -126,15 +171,33 @@ export default function ProfileContent() {
                   {message.text}
                 </Alert>
               ) : null}
-              <Stack direction="row" spacing={2} alignItems="center">
+              <Stack direction="row" spacing={2} alignItems="flex-start">
                 <Avatar
                   src={profile.image ?? undefined}
                   alt={profile.name ?? ""}
                   sx={{ width: 72, height: 72 }}
                 />
-                <Typography variant="body2" color="text.secondary">
-                  アバターは Google アカウントの画像を表示しています。
-                </Typography>
+                <Stack spacing={0.5} alignItems="flex-start">
+                  <Button
+                    component="label"
+                    variant="outlined"
+                    size="small"
+                    disabled={avatarUploading || saving}
+                    sx={{ cursor: avatarUploading ? "wait" : "pointer" }}
+                  >
+                    {avatarUploading ? "アップロード中…" : "画像をアップロード"}
+                    <input
+                      type="file"
+                      hidden
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      onChange={handleAvatarChange}
+                    />
+                  </Button>
+                  <Typography variant="caption" color="text.secondary">
+                    JPEG / PNG / WebP / GIF、300KB 以下。アップロードした画像が OAuth
+                    のプロフィール写真より優先して表示されます。
+                  </Typography>
+                </Stack>
               </Stack>
               <TextField
                 label="メールアドレス"

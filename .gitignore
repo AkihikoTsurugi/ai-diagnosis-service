@@ -24,6 +24,10 @@
 .DS_Store
 *.pem
 
+# User-uploaded profile images（ディレクトリ構造のみコミット）
+/public/uploads/avatars/*
+!/public/uploads/avatars/.gitkeep
+
 # debug
 npm-debug.log*
 yarn-debug.log*

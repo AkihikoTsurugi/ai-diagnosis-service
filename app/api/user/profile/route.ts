@@ -1,33 +1,10 @@
 import { auth } from "@/auth";
-import clientPromise, { getDbName } from "@/lib/mongodb";
+import { serializeUser } from "@/lib/userProfileSerialize";
+import { getUsersCollection } from "@/lib/usersCollection";
 import { ObjectId } from "mongodb";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
-
-async function getUsersCollection() {
-  const client = await clientPromise;
-  const dbName = getDbName();
-  return client.db(dbName).collection("users");
-}
-
-function serializeUser(doc: Record<string, unknown>) {
-  return {
-    id: (doc._id as ObjectId).toHexString(),
-    name: doc.name as string | null,
-    email: doc.email as string | null,
-    image: doc.image as string | null,
-    emailVerified: doc.emailVerified
-      ? new Date(doc.emailVerified as Date).toISOString()
-      : null,
-    createdAt: doc.createdAt
-      ? new Date(doc.createdAt as Date).toISOString()
-      : null,
-    updatedAt: doc.updatedAt
-      ? new Date(doc.updatedAt as Date).toISOString()
-      : null,
-  };
-}
 
 export async function GET() {
   const session = await auth();
@@ -57,7 +34,7 @@ export async function GET() {
     Object.assign(doc, patch);
   }
 
-  return NextResponse.json(serializeUser(doc));
+  return NextResponse.json(serializeUser(doc as Record<string, unknown>));
 }
 
 export async function PUT(req: Request) {
