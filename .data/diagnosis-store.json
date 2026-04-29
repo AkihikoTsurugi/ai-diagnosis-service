@@ -131,6 +131,50 @@
       },
       "createdAt": "2026-04-29T14:26:41.921Z",
       "updatedAt": "2026-04-29T14:26:41.921Z"
+    },
+    {
+      "_id": "19dd9b125f204fc3bde9306b",
+      "userId": "9fddf6fd1d1e4f498c0dddc0",
+      "answers": {
+        "q1": "adsadsa",
+        "q2": "asdafdsa",
+        "q3": "sdsgfggtｇｇ「「",
+        "q4": "ｔｒｔ「",
+        "q5": "ｄｇｄｆｆ"
+      },
+      "result": {
+        "summary": "adsadsaとasdafdsaを軸に、sdsgfggtｇｇ「「へ近づく実践型キャリア戦略が有効です。",
+        "strengths": [
+          "adsadsaに関する継続力",
+          "asdafdsaに対する学習意欲",
+          "自己分析を言語化できる力"
+        ],
+        "recommendedCareers": [
+          "asdafdsaを活かせる実務職",
+          "プロジェクト推進に関わる職種",
+          "顧客価値を設計する職種"
+        ],
+        "cautions": [
+          "短期で完璧を目指しすぎない",
+          "目標を週次タスクへ分解して継続する"
+        ]
+      },
+      "careerRoadmap": {
+        "shortTerm": [
+          "asdafdsaの基礎学習を2週間で整理する",
+          "adsadsaの実績をポートフォリオ化する"
+        ],
+        "midTerm": [
+          "2〜3か月で成果物を1件公開する",
+          "メンターやコミュニティから月1回フィードバックを得る"
+        ],
+        "longTerm": [
+          "sdsgfggtｇｇ「「に直結する職務へ応募・異動する",
+          "実務経験を積みつつ専門領域を明確化する"
+        ]
+      },
+      "createdAt": "2026-04-29T14:42:38.706Z",
+      "updatedAt": "2026-04-29T14:42:38.706Z"
     }
   ]
 }
