@@ -1,30 +1,10 @@
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
-import Link from "next/link";
+import { Suspense } from "react";
+import HelloworkSearchContent from "./HelloworkSearchContent";
 
-type HelloworkSearchPageProps = {
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
-};
-
-export default async function HelloworkSearchPage({
-  searchParams,
-}: HelloworkSearchPageProps) {
-  const resolvedSearchParams = (await searchParams) ?? {};
-  const idParam = resolvedSearchParams.id;
-  const id = Array.isArray(idParam) ? idParam[0] : idParam;
-  const backHref = id ? `/diagnosis/result?id=${id}` : "/diagnosis/result";
-
+export default function HelloworkSearchPage() {
   return (
-    <Box sx={{ p: 3, maxWidth: 900, mx: "auto" }}>
-      <Stack spacing={3}>
-        <Typography variant="h4">ハローワーク検索</Typography>
-        <Typography>検索条件等は現在制作中です。</Typography>
-        <Button component={Link} href={backHref} variant="outlined">
-          戻る
-        </Button>
-      </Stack>
-    </Box>
+    <Suspense fallback={null}>
+      <HelloworkSearchContent />
+    </Suspense>
   );
 }
