@@ -51,6 +51,12 @@ export default function DashboardContent({
               <Button component={Link} href="/profile" variant="contained">
                 プロフィール
               </Button>
+              <Button component={Link} href="/diagnosis" variant="contained">
+                AIキャリア診断
+              </Button>
+              <Button component={Link} href="/diagnosis/history" variant="outlined">
+                診断履歴
+              </Button>
               <Button component={Link} href="/" variant="outlined">
                 トップへ
               </Button>

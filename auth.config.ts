@@ -21,7 +21,9 @@ export default {
     authorized({ auth, request }) {
       const { pathname } = request.nextUrl;
       const protectedPath =
-        pathname.startsWith("/dashboard") || pathname.startsWith("/profile");
+        pathname.startsWith("/dashboard") ||
+        pathname.startsWith("/profile") ||
+        pathname.startsWith("/diagnosis");
       if (protectedPath && !auth?.user) {
         return false;
       }
