@@ -102,6 +102,9 @@ export default function DiagnosisResultClient() {
                 <Button component={Link} href={`/diagnosis/${data._id}`}>
                   詳細ページへ
                 </Button>
+                <Button component={Link} href={`/hellowork-search?id=${data._id}`}>
+                  ハローワーク検索を行う
+                </Button>
               </Stack>
             </CardContent>
           </Card>
