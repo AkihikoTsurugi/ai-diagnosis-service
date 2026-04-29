@@ -1,12 +1,12 @@
 import { MongoClient } from "mongodb";
 
-const mongodbUri = process.env.MONGODB_URI;
-if (!mongodbUri) {
-  throw new Error('環境変数 "MONGODB_URI" が設定されていません。');
-}
-
 declare global {
   var _mongoClientPromise: Promise<MongoClient> | undefined;
+}
+
+export function isMongoConfigured(): boolean {
+  const uri = process.env.MONGODB_URI;
+  return typeof uri === "string" && uri.length > 0;
 }
 
 function createClientPromise(connectionString: string): Promise<MongoClient> {
@@ -14,12 +14,17 @@ function createClientPromise(connectionString: string): Promise<MongoClient> {
   return client.connect();
 }
 
-const clientPromise: Promise<MongoClient> =
-  process.env.NODE_ENV === "development"
-    ? (global._mongoClientPromise ??= createClientPromise(mongodbUri))
-    : createClientPromise(mongodbUri);
-
-export default clientPromise;
+/** MongoDB 接続。未設定のときは呼び出し時にエラー。 */
+export function getClientPromise(): Promise<MongoClient> {
+  const mongodbUri = process.env.MONGODB_URI;
+  if (!mongodbUri) {
+    throw new Error('環境変数 "MONGODB_URI" が設定されていません。');
+  }
+  if (process.env.NODE_ENV === "development") {
+    return (global._mongoClientPromise ??= createClientPromise(mongodbUri));
+  }
+  return createClientPromise(mongodbUri);
+}
 
 export function getDbName(): string | undefined {
   const name = process.env.MONGODB_DB;

@@ -1,10 +1,23 @@
 import { auth } from "@/auth";
-import clientPromise, { getDbName } from "@/lib/mongodb";
+import { getClientPromise, getDbName, isMongoConfigured } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { NextResponse } from "next/server";
 
+function mongoRequiredResponse() {
+  if (!isMongoConfigured()) {
+    return NextResponse.json(
+      {
+        error:
+          "MongoDB が未設定です。プロフィール API には .env.local に MONGODB_URI を設定してください。",
+      },
+      { status: 503 },
+    );
+  }
+  return null;
+}
+
 async function getUsersCollection() {
-  const client = await clientPromise;
+  const client = await getClientPromise();
   const dbName = getDbName();
   return client.db(dbName).collection("users");
 }
@@ -28,6 +41,9 @@ function serializeUser(doc: Record<string, unknown>) {
 }
 
 export async function GET() {
+  const mongoErr = mongoRequiredResponse();
+  if (mongoErr) return mongoErr;
+
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "認証が必要です" }, { status: 401 });
@@ -59,6 +75,9 @@ export async function GET() {
 }
 
 export async function PUT(req: Request) {
+  const mongoErr = mongoRequiredResponse();
+  if (mongoErr) return mongoErr;
+
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "認証が必要です" }, { status: 401 });

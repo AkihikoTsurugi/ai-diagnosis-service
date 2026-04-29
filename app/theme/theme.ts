@@ -1,24 +1,29 @@
 "use client";
 
 import { createTheme } from "@mui/material/styles";
+import { brandPalette } from "./brandPalette";
 
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#1976D2",
-      dark: "#1565C0",
-      light: "#42A5F5",
+      main: brandPalette.primaryMain,
+      dark: brandPalette.primaryDark,
+      light: brandPalette.primaryLight,
+      contrastText: "#FFFFFF",
     },
     secondary: {
-      main: "#FF6B35",
+      main: brandPalette.black,
+      dark: brandPalette.black,
+      light: "#212121",
+      contrastText: "#FFFFFF",
     },
     background: {
-      default: "#FFFFFF",
+      default: "#FFF8F7",
       paper: "#FFFFFF",
     },
     text: {
-      primary: "#212121",
-      secondary: "#666666",
+      primary: "#000000",
+      secondary: "#424242",
     },
   },
   typography: {

@@ -12,10 +12,8 @@ interface CtaButtonProps {
   variant?: Variant;
 }
 
-export default function CtaButton({ label, variant = "hero" }: CtaButtonProps) {
+export default function CtaButton({ label, variant: _variant = "hero" }: CtaButtonProps) {
   const [open, setOpen] = useState(false);
-
-  const isHero = variant === "hero";
 
   return (
     <>
@@ -29,25 +27,16 @@ export default function CtaButton({ label, variant = "hero" }: CtaButtonProps) {
           fontSize: { xs: "1rem", md: "1.125rem" },
           borderRadius: "16px",
           fontWeight: 700,
-          ...(isHero
-            ? {
-                bgcolor: "#fff",
-                color: "primary.main",
-                "&:hover": {
-                  bgcolor: "rgba(255,255,255,0.92)",
-                  transform: "scale(1.04)",
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
-                },
-              }
-            : {
-                bgcolor: "#fff",
-                color: "primary.main",
-                "&:hover": {
-                  bgcolor: "rgba(255,255,255,0.92)",
-                  transform: "scale(1.04)",
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
-                },
-              }),
+          bgcolor: "#0A0A0A",
+          color: "#FFFFFF",
+          border: "1px solid rgba(255,255,255,0.18)",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
+          "&:hover": {
+            bgcolor: "#1E1E1E",
+            transform: "scale(1.04)",
+            borderColor: "rgba(255,255,255,0.28)",
+            boxShadow: "0 6px 28px rgba(0,0,0,0.45)",
+          },
           transition: "all 0.25s cubic-bezier(.4,0,.2,1)",
         }}
       >

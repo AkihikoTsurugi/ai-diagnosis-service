@@ -19,7 +19,7 @@ export default function StepsSection() {
   return (
     <Box
       component="section"
-      sx={{ py: { xs: 8, md: 12 }, bgcolor: "#F8F9FA" }}
+      sx={{ py: { xs: 8, md: 12 }, bgcolor: "#F3F1F0" }}
     >
       <Container maxWidth="lg">
         <SectionTitle title="かんたん3ステップ" />

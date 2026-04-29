@@ -8,6 +8,7 @@ import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import TimerIcon from "@mui/icons-material/Timer";
 import BalanceIcon from "@mui/icons-material/Balance";
 import { FEATURES } from "@/app/lib/constants";
+import { sectionAccentStripes } from "@/app/theme/brandPalette";
 import SectionTitle from "./common/SectionTitle";
 
 const iconMap = {
@@ -52,14 +53,15 @@ export default function FeaturesSection() {
                         width: 72,
                         height: 72,
                         borderRadius: "50%",
-                        bgcolor: "primary.main",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                         mx: "auto",
                         mb: 3,
-                        background:
-                          "linear-gradient(135deg, rgba(25,118,210,0.12) 0%, rgba(25,118,210,0.06) 100%)",
+                        background: sectionAccentStripes.featuresIcon,
+                        border: "1px solid",
+                        borderColor: "rgba(196, 30, 42, 0.22)",
+                        boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.6)",
                       }}
                     >
                       <Icon sx={{ fontSize: 36, color: "primary.main" }} />

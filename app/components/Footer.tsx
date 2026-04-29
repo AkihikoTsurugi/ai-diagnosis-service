@@ -10,15 +10,28 @@ export default function Footer() {
     <Box
       component="footer"
       sx={{
+        position: "relative",
         py: 3,
-        bgcolor: "#1A1A2E",
+        pt: 3.5,
+        bgcolor: "#0C0C0C",
         textAlign: "center",
+        /* ストライプバッグの縁取り：細い赤・白・黒のリピート */
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 6,
+          background:
+            "repeating-linear-gradient(90deg, #E01826 0px 18px, #FFFFFF 18px 30px, #000000 30px 44px, #E01826 44px 62px, #FFFFFF 62px 74px)",
+        },
       }}
     >
       <Container maxWidth="lg">
         <Typography
           variant="body2"
-          sx={{ color: "rgba(255,255,255,0.5)", fontSize: "0.8rem" }}
+          sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.8rem" }}
         >
           &copy; {year} {SITE_NAME}. All rights reserved.
         </Typography>
