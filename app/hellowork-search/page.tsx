@@ -1,15 +1,19 @@
-"use client";
-
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 
-export default function HelloworkSearchPage() {
-  const searchParams = useSearchParams();
-  const id = searchParams.get("id");
+type HelloworkSearchPageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function HelloworkSearchPage({
+  searchParams,
+}: HelloworkSearchPageProps) {
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const idParam = resolvedSearchParams.id;
+  const id = Array.isArray(idParam) ? idParam[0] : idParam;
   const backHref = id ? `/diagnosis/result?id=${id}` : "/diagnosis/result";
 
   return (
