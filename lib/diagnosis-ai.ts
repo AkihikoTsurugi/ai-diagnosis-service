@@ -121,17 +121,43 @@ export async function generateDiagnosis(answers: DiagnosisAnswers) {
   }
 
   const client = new Anthropic({ apiKey });
-  const model = process.env.ANTHROPIC_MODEL ?? "claude-3-5-haiku-latest";
-  const response = await client.messages.create({
-    model,
-    max_tokens: 1200,
-    temperature: 0.3,
-    messages: [{ role: "user", content: buildPrompt(answers) }],
-  });
+  const envModel = process.env.ANTHROPIC_MODEL?.trim();
+  const deprecatedModels = new Set([
+    "claude-3-5-haiku-latest",
+    "claude-3-5-haiku-20241022",
+    "claude-3-haiku-20240307",
+  ]);
+  const modelCandidates = [
+    "claude-4-5-haiku-latest",
+    ...(envModel && !deprecatedModels.has(envModel) ? [envModel] : []),
+  ];
 
-  const text = response.content
-    .filter((item) => item.type === "text")
-    .map((item) => item.text)
-    .join("\n");
-  return parseAiResponse(text);
+  for (const model of modelCandidates) {
+    try {
+      const response = await client.messages.create({
+        model,
+        max_tokens: 1200,
+        temperature: 0.3,
+        messages: [{ role: "user", content: buildPrompt(answers) }],
+      });
+
+      const text = response.content
+        .filter((item) => item.type === "text")
+        .map((item) => item.text)
+        .join("\n");
+      return parseAiResponse(text);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "";
+      if (
+        msg.includes("not_found_error") ||
+        msg.includes("model:") ||
+        msg.includes("404")
+      ) {
+        continue;
+      }
+      return fallbackAnalysis;
+    }
+  }
+
+  return fallbackAnalysis;
 }

@@ -1,5 +1,10 @@
 import { auth } from "@/auth";
 import { connectMongoose } from "@/lib/mongoose";
+import {
+  deleteDiagnosisLocal,
+  getDiagnosisLocal,
+  updateDiagnosisLocal,
+} from "@/lib/diagnosis-local-store";
 import { DiagnosisModel, type DiagnosisDocument } from "@/models/Diagnosis";
 import type {
   CareerRoadmap,
@@ -100,11 +105,20 @@ export async function GET(
     return NextResponse.json({ error: "ID が不正です" }, { status: 400 });
   }
 
-  await connectMongoose();
-  const doc = await DiagnosisModel.findOne({
-    _id: new Types.ObjectId(id),
-    userId: new Types.ObjectId(session.user.id),
-  }).lean<DiagnosisDocument | null>();
+  let doc: DiagnosisDocument | null = null;
+  try {
+    await connectMongoose();
+    doc = await DiagnosisModel.findOne({
+      _id: new Types.ObjectId(id),
+      userId: new Types.ObjectId(session.user.id),
+    }).lean<DiagnosisDocument | null>();
+  } catch {
+    const local = await getDiagnosisLocal(session.user.id, id);
+    if (!local) {
+      return NextResponse.json({ error: "診断結果が見つかりません" }, { status: 404 });
+    }
+    return NextResponse.json(local);
+  }
 
   if (!doc) {
     return NextResponse.json({ error: "診断結果が見つかりません" }, { status: 404 });
@@ -139,20 +153,29 @@ export async function PUT(
     return NextResponse.json({ error: "更新データが不正です" }, { status: 400 });
   }
 
-  await connectMongoose();
-  const updated = await DiagnosisModel.findOneAndUpdate(
-    {
-      _id: new Types.ObjectId(id),
-      userId: new Types.ObjectId(session.user.id),
-    },
-    {
-      $set: {
-        result: payload.result,
-        careerRoadmap: payload.careerRoadmap,
+  let updated: DiagnosisDocument | null = null;
+  try {
+    await connectMongoose();
+    updated = await DiagnosisModel.findOneAndUpdate(
+      {
+        _id: new Types.ObjectId(id),
+        userId: new Types.ObjectId(session.user.id),
       },
-    },
-    { new: true },
-  ).lean<DiagnosisDocument | null>();
+      {
+        $set: {
+          result: payload.result,
+          careerRoadmap: payload.careerRoadmap,
+        },
+      },
+      { new: true },
+    ).lean<DiagnosisDocument | null>();
+  } catch {
+    const local = await updateDiagnosisLocal(session.user.id, id, payload);
+    if (!local) {
+      return NextResponse.json({ error: "診断結果が見つかりません" }, { status: 404 });
+    }
+    return NextResponse.json(local);
+  }
 
   if (!updated) {
     return NextResponse.json({ error: "診断結果が見つかりません" }, { status: 404 });
@@ -175,11 +198,20 @@ export async function DELETE(
     return NextResponse.json({ error: "ID が不正です" }, { status: 400 });
   }
 
-  await connectMongoose();
-  const deleted = await DiagnosisModel.findOneAndDelete({
-    _id: new Types.ObjectId(id),
-    userId: new Types.ObjectId(session.user.id),
-  });
+  let deleted: unknown = null;
+  try {
+    await connectMongoose();
+    deleted = await DiagnosisModel.findOneAndDelete({
+      _id: new Types.ObjectId(id),
+      userId: new Types.ObjectId(session.user.id),
+    });
+  } catch {
+    const ok = await deleteDiagnosisLocal(session.user.id, id);
+    if (!ok) {
+      return NextResponse.json({ error: "診断結果が見つかりません" }, { status: 404 });
+    }
+    return NextResponse.json({ success: true });
+  }
 
   if (!deleted) {
     return NextResponse.json({ error: "診断結果が見つかりません" }, { status: 404 });

@@ -44,7 +44,12 @@ export default function DiagnosisForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(answers),
       });
-      const data = (await res.json()) as { _id?: string; error?: string };
+      let data: { _id?: string; error?: string };
+      try {
+        data = (await res.json()) as { _id?: string; error?: string };
+      } catch {
+        throw new Error("サーバー応答の読み取りに失敗しました");
+      }
       if (!res.ok || !data._id) {
         throw new Error(data.error ?? "診断の実行に失敗しました");
       }

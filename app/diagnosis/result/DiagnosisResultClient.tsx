@@ -28,9 +28,16 @@ export default function DiagnosisResultClient() {
       }
       try {
         const res = await fetch(`/api/diagnosis/${id}`);
-        const payload = (await res.json()) as DiagnosisDocumentShape & {
+        let payload: DiagnosisDocumentShape & {
           error?: string;
         };
+        try {
+          payload = (await res.json()) as DiagnosisDocumentShape & {
+            error?: string;
+          };
+        } catch {
+          throw new Error("サーバー応答の読み取りに失敗しました");
+        }
         if (!res.ok) {
           throw new Error(payload.error ?? "取得に失敗しました");
         }

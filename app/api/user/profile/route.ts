@@ -3,19 +3,6 @@ import { getClientPromise, getDbName, isMongoConfigured } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { NextResponse } from "next/server";
 
-function mongoRequiredResponse() {
-  if (!isMongoConfigured()) {
-    return NextResponse.json(
-      {
-        error:
-          "MongoDB が未設定です。プロフィール API には .env.local に MONGODB_URI を設定してください。",
-      },
-      { status: 503 },
-    );
-  }
-  return null;
-}
-
 async function getUsersCollection() {
   const client = await getClientPromise();
   const dbName = getDbName();
@@ -40,44 +27,61 @@ function serializeUser(doc: Record<string, unknown>) {
   };
 }
 
-export async function GET() {
-  const mongoErr = mongoRequiredResponse();
-  if (mongoErr) return mongoErr;
+function fallbackProfile(session: {
+  user: { id?: string; name?: string | null; email?: string | null; image?: string | null };
+}) {
+  return {
+    id: session.user.id ?? "unknown",
+    name: session.user.name ?? null,
+    email: session.user.email ?? null,
+    image: session.user.image ?? null,
+    emailVerified: null,
+    createdAt: null,
+    updatedAt: new Date().toISOString(),
+    warning: "MongoDB未接続のため、セッション情報を表示しています。",
+  };
+}
 
+export async function GET() {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "認証が必要です" }, { status: 401 });
+  }
+
+  if (!isMongoConfigured()) {
+    return NextResponse.json(fallbackProfile(session));
   }
 
   let oid: ObjectId;
   try {
     oid = new ObjectId(session.user.id);
   } catch {
-    return NextResponse.json({ error: "無効なユーザー ID です" }, { status: 400 });
+    return NextResponse.json(fallbackProfile(session));
   }
 
-  const users = await getUsersCollection();
-  const doc = await users.findOne({ _id: oid });
-  if (!doc) {
-    return NextResponse.json({ error: "ユーザーが見つかりません" }, { status: 404 });
-  }
+  try {
+    const users = await getUsersCollection();
+    const doc = await users.findOne({ _id: oid });
+    if (!doc) {
+      return NextResponse.json(fallbackProfile(session));
+    }
 
-  const now = new Date();
-  const patch: Record<string, Date> = {};
-  if (!doc.createdAt) patch.createdAt = now;
-  if (!doc.updatedAt) patch.updatedAt = now;
-  if (Object.keys(patch).length > 0) {
-    await users.updateOne({ _id: oid }, { $set: patch });
-    Object.assign(doc, patch);
-  }
+    const now = new Date();
+    const patch: Record<string, Date> = {};
+    if (!doc.createdAt) patch.createdAt = now;
+    if (!doc.updatedAt) patch.updatedAt = now;
+    if (Object.keys(patch).length > 0) {
+      await users.updateOne({ _id: oid }, { $set: patch });
+      Object.assign(doc, patch);
+    }
 
-  return NextResponse.json(serializeUser(doc));
+    return NextResponse.json(serializeUser(doc));
+  } catch {
+    return NextResponse.json(fallbackProfile(session));
+  }
 }
 
 export async function PUT(req: Request) {
-  const mongoErr = mongoRequiredResponse();
-  if (mongoErr) return mongoErr;
-
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "認証が必要です" }, { status: 401 });
@@ -113,25 +117,53 @@ export async function PUT(req: Request) {
   try {
     oid = new ObjectId(session.user.id);
   } catch {
-    return NextResponse.json({ error: "無効なユーザー ID です" }, { status: 400 });
+    return NextResponse.json({
+      ...fallbackProfile(session),
+      name,
+      warning: "MongoDB未接続のため、変更は一時反映です。",
+    });
   }
 
-  const users = await getUsersCollection();
-  const now = new Date();
-  const patch: Record<string, unknown> = { name, updatedAt: now };
-  const existing = await users.findOne({ _id: oid });
-  if (!existing) {
-    return NextResponse.json({ error: "ユーザーが見つかりません" }, { status: 404 });
-  }
-  if (!existing.createdAt) {
-    patch.createdAt = now;
+  if (!isMongoConfigured()) {
+    return NextResponse.json({
+      ...fallbackProfile(session),
+      name,
+      warning: "MongoDB未接続のため、変更は一時反映です。",
+    });
   }
 
-  await users.updateOne({ _id: oid }, { $set: patch });
-  const updated = await users.findOne({ _id: oid });
-  if (!updated) {
-    return NextResponse.json({ error: "ユーザーが見つかりません" }, { status: 404 });
-  }
+  try {
+    const users = await getUsersCollection();
+    const now = new Date();
+    const patch: Record<string, unknown> = { name, updatedAt: now };
+    const existing = await users.findOne({ _id: oid });
+    if (!existing) {
+      return NextResponse.json({
+        ...fallbackProfile(session),
+        name,
+        warning: "MongoDB未接続のため、変更は一時反映です。",
+      });
+    }
+    if (!existing.createdAt) {
+      patch.createdAt = now;
+    }
 
-  return NextResponse.json(serializeUser(updated as Record<string, unknown>));
+    await users.updateOne({ _id: oid }, { $set: patch });
+    const updated = await users.findOne({ _id: oid });
+    if (!updated) {
+      return NextResponse.json({
+        ...fallbackProfile(session),
+        name,
+        warning: "MongoDB未接続のため、変更は一時反映です。",
+      });
+    }
+
+    return NextResponse.json(serializeUser(updated as Record<string, unknown>));
+  } catch {
+    return NextResponse.json({
+      ...fallbackProfile(session),
+      name,
+      warning: "MongoDB未接続のため、変更は一時反映です。",
+    });
+  }
 }
