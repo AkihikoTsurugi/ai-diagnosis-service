@@ -10,19 +10,56 @@ type AiDiagnosisPayload = {
   careerRoadmap: CareerRoadmap;
 };
 
-const fallbackAnalysis: AiDiagnosisPayload = {
-  result: {
-    summary: "あなたの回答から、対話力と継続学習力を活かせるキャリアが適しています。",
-    strengths: ["コミュニケーション力", "課題発見力", "学習継続力"],
-    recommendedCareers: ["プロダクトマネージャー", "カスタマーサクセス", "ITコンサルタント"],
-    cautions: ["短期で成果を求めすぎない", "得意領域を言語化して発信する"],
-  },
-  careerRoadmap: {
-    shortTerm: ["1日30分の学習習慣を固定する", "週1回の振り返りを行う"],
-    midTerm: ["3か月でポートフォリオを1件完成させる", "業界イベントに月1回参加する"],
-    longTerm: ["1年以内に希望職種へ応募する", "専門性を軸にキャリア戦略を再設計する"],
-  },
-};
+function pickKeywords(answers: DiagnosisAnswers) {
+  const all = Object.values(answers)
+    .join(" ")
+    .replace(/[。、,\.\n]/g, " ")
+    .split(/\s+/)
+    .map((x) => x.trim())
+    .filter((x) => x.length >= 2);
+  const uniq = Array.from(new Set(all));
+  return uniq.slice(0, 6);
+}
+
+function buildFallbackAnalysis(answers: DiagnosisAnswers): AiDiagnosisPayload {
+  const keywords = pickKeywords(answers);
+  const k1 = keywords[0] ?? "現在の経験";
+  const k2 = keywords[1] ?? "挑戦したい領域";
+  const k3 = keywords[2] ?? "将来目標";
+  return {
+    result: {
+      summary: `${k1}と${k2}を軸に、${k3}へ近づく実践型キャリア戦略が有効です。`,
+      strengths: [
+        `${k1}に関する継続力`,
+        `${k2}に対する学習意欲`,
+        "自己分析を言語化できる力",
+      ],
+      recommendedCareers: [
+        `${k2}を活かせる実務職`,
+        "プロジェクト推進に関わる職種",
+        "顧客価値を設計する職種",
+      ],
+      cautions: [
+        "短期で完璧を目指しすぎない",
+        "目標を週次タスクへ分解して継続する",
+      ],
+    },
+    careerRoadmap: {
+      shortTerm: [
+        `${k2}の基礎学習を2週間で整理する`,
+        `${k1}の実績をポートフォリオ化する`,
+      ],
+      midTerm: [
+        "2〜3か月で成果物を1件公開する",
+        "メンターやコミュニティから月1回フィードバックを得る",
+      ],
+      longTerm: [
+        `${k3}に直結する職務へ応募・異動する`,
+        "実務経験を積みつつ専門領域を明確化する",
+      ],
+    },
+  };
+}
 
 function buildPrompt(answers: DiagnosisAnswers) {
   return `
@@ -61,7 +98,10 @@ function normalizeArray(value: unknown, fallback: string[]) {
   return cleaned.length > 0 ? cleaned : fallback;
 }
 
-function parseAiResponse(rawText: string): AiDiagnosisPayload {
+function parseAiResponse(
+  rawText: string,
+  fallbackAnalysis: AiDiagnosisPayload,
+): AiDiagnosisPayload {
   const jsonStart = rawText.indexOf("{");
   const jsonEnd = rawText.lastIndexOf("}");
   if (jsonStart < 0 || jsonEnd < 0 || jsonEnd <= jsonStart) {
@@ -115,6 +155,7 @@ function parseAiResponse(rawText: string): AiDiagnosisPayload {
 }
 
 export async function generateDiagnosis(answers: DiagnosisAnswers) {
+  const fallbackAnalysis = buildFallbackAnalysis(answers);
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     return fallbackAnalysis;
@@ -145,7 +186,7 @@ export async function generateDiagnosis(answers: DiagnosisAnswers) {
         .filter((item) => item.type === "text")
         .map((item) => item.text)
         .join("\n");
-      return parseAiResponse(text);
+      return parseAiResponse(text, fallbackAnalysis);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "";
       if (

@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import Backdrop from "@mui/material/Backdrop";
 import Button from "@mui/material/Button";
-import Snackbar from "@mui/material/Snackbar";
-import { COMING_SOON_MESSAGE } from "@/app/lib/constants";
+import CircularProgress from "@mui/material/CircularProgress";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import { useRouter } from "next/navigation";
 
 type Variant = "hero" | "section";
 
@@ -13,14 +16,19 @@ interface CtaButtonProps {
 }
 
 export default function CtaButton({ label, variant: _variant = "hero" }: CtaButtonProps) {
-  const [open, setOpen] = useState(false);
+  const router = useRouter();
+  const [navigating, setNavigating] = useState(false);
 
   return (
     <>
       <Button
         variant="contained"
         size="large"
-        onClick={() => setOpen(true)}
+        disabled={navigating}
+        onClick={() => {
+          setNavigating(true);
+          router.push("/diagnosis");
+        }}
         sx={{
           px: { xs: 4, md: 5 },
           py: { xs: 1.5, md: 1.75 },
@@ -42,13 +50,15 @@ export default function CtaButton({ label, variant: _variant = "hero" }: CtaButt
       >
         {label}
       </Button>
-      <Snackbar
-        open={open}
-        autoHideDuration={3000}
-        onClose={() => setOpen(false)}
-        message={COMING_SOON_MESSAGE}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      />
+      <Backdrop
+        open={navigating}
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+      >
+        <Stack spacing={2} alignItems="center">
+          <CircularProgress color="inherit" />
+          <Typography>診断ページへ移動中です…</Typography>
+        </Stack>
+      </Backdrop>
     </>
   );
 }

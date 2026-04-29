@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import Alert from "@mui/material/Alert";
+import Backdrop from "@mui/material/Backdrop";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
+import CircularProgress from "@mui/material/CircularProgress";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
@@ -82,6 +84,7 @@ export default function DiagnosisForm() {
                   key={q.key}
                   label={q.label}
                   value={answers[q.key]}
+                  disabled={submitting}
                   onChange={(e) =>
                     setAnswers((prev) => ({ ...prev, [q.key]: e.target.value }))
                   }
@@ -99,6 +102,15 @@ export default function DiagnosisForm() {
           </CardContent>
         </Card>
       </Stack>
+      <Backdrop
+        open={submitting}
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+      >
+        <Stack spacing={2} alignItems="center">
+          <CircularProgress color="inherit" />
+          <Typography>診断結果を作成しています…</Typography>
+        </Stack>
+      </Backdrop>
     </Box>
   );
 }
