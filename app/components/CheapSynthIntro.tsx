@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { LP_BGM_ENABLED } from "@/app/lib/constants";
 
 /** 132 BPM */
 const BPM = 132;
@@ -316,6 +317,7 @@ export default function CheapSynthIntro() {
   const playedRef = useRef(false);
 
   useEffect(() => {
+    if (!LP_BGM_ENABLED) return;
     if (typeof window === "undefined") return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       return;

@@ -1,5 +1,9 @@
 export const SITE_NAME = "SurvibeAI";
 
+/** LP イントロ BGM。再有効化時は NEXT_PUBLIC_ENABLE_LP_BGM=true を設定 */
+export const LP_BGM_ENABLED =
+  process.env.NEXT_PUBLIC_ENABLE_LP_BGM === "true";
+
 export const HERO = {
   catchcopy: "5問で見つかる、あなたの未来。",
   subcopy:
