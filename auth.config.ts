@@ -7,6 +7,10 @@ export default {
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      /**
+       * 本番で AUTH_URL / ドメイン不一致があると PKCE エラーになりやすいため state のみにする。
+       */
+      checks: ["state"],
     }),
   ],
   session: {

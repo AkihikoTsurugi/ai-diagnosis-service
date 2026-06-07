@@ -14,16 +14,21 @@ function createClientPromise(connectionString: string): Promise<MongoClient> {
   return client.connect();
 }
 
-/** MongoDB 接続。未設定のときは呼び出し時にエラー。 */
-export function getClientPromise(): Promise<MongoClient> {
+function getOrCreateClientPromise(): Promise<MongoClient> {
   const mongodbUri = process.env.MONGODB_URI;
   if (!mongodbUri) {
     throw new Error('環境変数 "MONGODB_URI" が設定されていません。');
   }
-  if (process.env.NODE_ENV === "development") {
-    return (global._mongoClientPromise ??= createClientPromise(mongodbUri));
-  }
-  return createClientPromise(mongodbUri);
+  return (global._mongoClientPromise ??= createClientPromise(mongodbUri));
+}
+
+/** Vercel 等のサーバーレスでも同一実行環境内で接続を再利用する（公式推奨パターン） */
+const clientPromise = getOrCreateClientPromise();
+
+export default clientPromise;
+
+export function getClientPromise(): Promise<MongoClient> {
+  return getOrCreateClientPromise();
 }
 
 export function getDbName(): string | undefined {
